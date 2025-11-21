@@ -3,8 +3,19 @@ FROM osrf/ros:melodic-desktop-full
 # select bash as default shell
 SHELL ["/bin/bash", "-c"]
 
-# install catkin
-RUN apt update && apt install python-catkin-tools python-wstool -y
+# # install catkin
+# RUN apt update && apt install python-catkin-tools python-wstool -y
+# install catkin + wstool + glog_catkin
+RUN apt update && apt install -y \
+    python-catkin-tools \
+    python-wstool \
+    libglpk-dev \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN source /opt/ros/melodic/setup.bash
 
 #install system deps
