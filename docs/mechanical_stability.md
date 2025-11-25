@@ -10,11 +10,13 @@ $$
 $$
 
 Solving for the ZMP location gives the expression implemented in code:
+
 $$
 r_{\text{ZMP}} = \frac{n \times (\ r_{\text{COM}} \times f_g - r_{EE} \times f_{EE} - \tau_{EE}\ )}{n \cdot (\ f_g - f_{EE}\ )}.
 $$
 
 We constrain the ZMP to lie **inside** a support circle of radius $r_{sc}$ centered at the support polygon origin:
+
 $$
 g_{\text{ZMP}}(x) = r_{sc}^2 - \|r_{\text{ZMP}}\|_2^2 \ge 0.
 $$
