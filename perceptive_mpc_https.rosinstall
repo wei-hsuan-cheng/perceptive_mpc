@@ -25,6 +25,7 @@
 - git:
     local-name: kindr_ros
     uri: https://github.com/ethz-asl/kindr_ros.git
+    version: release
 - git:
     local-name: voxblox
     uri: https://github.com/leggedrobotics/voxblox.git

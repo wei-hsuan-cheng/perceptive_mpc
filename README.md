@@ -35,19 +35,19 @@ cd perceptive_mpc_ws
 mkdir src
 catkin init
 catkin config --extend /opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release
+
 cd src
 git clone https://github.com/leggedrobotics/perceptive_mpc.git
 wstool init . ./perceptive_mpc/perceptive_mpc_https.rosinstall
+
+# Build package
+cd ..
 catkin build perceptive_mpc
 ```
 
 Alternatively, you can also create a docker image by running:
 ```
-docker image build -t perceptive_mpc:v0.3 .
-```
-or pull the image from dockerhub:
-```
-docker pull rslethz/perceptive_mpc
+docker image build -t perceptive_mpc:v0.3 --build-arg TARGETARCH=amd64 .
 ```
 
 ## Demos
