@@ -3,7 +3,8 @@
 This note explains how the **Zero Moment Point (ZMP)** and the mechanical stability soft constraint are implemented and how to use them at runtime.
 
 ## Closed-form ZMP used in the code
-In the base frame, with surface normal $n = [0, 0, 1]^\top$ (vertical to ground), center of mass $r_{\text{COM}}$, end-effector position $r_{EE}$, gravity $f_g$ and commanded interaction wrench $\mathcal{F}_{EE} = (f_{EE}, \tau_{EE})$, the planar moment balance at the ZMP is
+In the base frame, with surface normal $n = [0, 0, 1]^\top$ (vertical to ground), center of mass $r_{\text{COM}}$, end-effector position $r_{EE}$, gravity $f_g$ and commanded interaction wrench $\mathcal{F}_{EE} = (f_{EE},\ \tau_{EE})$, the planar moment balance at the ZMP is
+
 $$
 0 = n \times \Big[(r_{\text{COM}} - r_{\text{ZMP}}) \times f_g - (r_{EE} - r_{\text{ZMP}}) \times f_{EE} - \tau_{EE}\Big].
 $$
