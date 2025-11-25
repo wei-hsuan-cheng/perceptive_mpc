@@ -26,9 +26,23 @@ Videos of our hardware experiments can be seen [here](https://youtu.be/cTXytsWyF
 
 The software has been tested with Ros Melodic under Ubuntu 18.04.
 
+### Build from source
 Create a new catkin workspace, configure it to build in release, download all dependencies with wstool and build ``perceptive_mpc``.
-```
-sudo apt install python-catkin-tools libglpk-dev python-wstool -y
+```bash
+# Install dependencies
+sudo apt install -y \
+   build-essential \
+   cmake \
+   git \
+   python-catkin-tools \
+   python-wstool \
+   libglpk-dev \
+   autoconf \
+   automake \
+   libtool \
+   pkg-config
+
+# Make directory
 source /opt/ros/melodic/setup.bash
 mkdir perceptive_mpc_ws
 cd perceptive_mpc_ws
@@ -36,18 +50,45 @@ mkdir src
 catkin init
 catkin config --extend /opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release
 
+# Clone package and download dependencies
 cd src
-git clone https://github.com/leggedrobotics/perceptive_mpc.git
+git clone https://github.com/wei-hsuan-cheng/perceptive_mpc.git
 wstool init . ./perceptive_mpc/perceptive_mpc_https.rosinstall
 
 # Build package
 cd ..
-catkin build perceptive_mpc
+catkin build perceptive_mpc && . devel/setup.bash
 ```
 
-Alternatively, you can also create a docker image by running:
+### Docker image
+```bash
+docker image build -f docker/Dockerfile -t perceptive_mpc:v0.3 --build-arg TARGETARCH=amd64 .
 ```
-docker image build -t perceptive_mpc:v0.3 --build-arg TARGETARCH=amd64 .
+
+### Custom docker development 
+Mount local `perceptive_mpc` package into container to dev your own package!
+```bash
+# Clone this repo
+mkdir -p ${HOME}/src
+cd ${HOME}/src
+git clone https://github.com/wei-hsuan-cheng/perceptive_mpc.git
+
+# Build docker image
+cd ~/src/perceptive_mpc
+docker build -f ./Dockerfile_dev \
+   --build-arg TARGETARCH=amd64 \
+   -t ocs2/perceptive_mpc .
+
+# Compose and start container
+docker compose -f ./compose.yaml up -d
+docker start perceptive_mpc
+docker exec -it perceptive_mpc bash
+
+# Then replace the /perceptive_mpc code by soft link!
+cd /usr/src/perceptive_mpc_ws/src && rm -rf /perceptive_mpc
+ln -s <your_path>/perceptive_mpc # linked to the local one
+cd /usr/src/perceptive_mpc_ws
+catkin build perceptive_mpc && . devel/setup.bash
 ```
 
 ## Demos
@@ -56,12 +97,14 @@ docker image build -t perceptive_mpc:v0.3 --build-arg TARGETARCH=amd64 .
 The easiest way to test the software is to use the provided launchfiles in the ```perceptive_mpc``` package.
 
 
-```roslaunch perceptive_mpc demo.launch```:
+```bash
+roslaunch perceptive_mpc demo.launch
+```
 
 This will launch a kinematic simulation of the motion planner. The computed optimal state is set as the observation of the MPC. An end-effector target can be set with an interactive marker in RVIZ.
 
 If you use the docker image, run the following commands instead:
-```
+```bash
 xhost local:root
 docker container run -it --rm --name mpc_demo \
  -e DISPLAY=$DISPLAY \
@@ -72,16 +115,22 @@ docker container run -it --rm --name mpc_demo \
 
 ### Collision Avoidance
 
-```roslaunch perceptive_mpc collision_avoidance_demo.launch```:
+```bash
+roslaunch perceptive_mpc collision_avoidance_demo.launch
+```
 
 Launches the MPC controller with collision avoidance. Call the following service to load a Euclidian Signed Distance Field (ESDF) map:
 
-```rosservice call /voxblox_node/load_map "file_path: '/path/to/esdf/map.esdf'"```
+```bash
+rosservice call /voxblox_node/load_map "file_path: '<your_path>/perceptive_mpc/example/example_map.esdf'"
+# e.g. in docker
+rosservice call /voxblox_node/load_map "file_path: '/usr/src/perceptive_mpc_ws/src/perceptive_mpc/example/example_map.esdf'"
+```
 
-An demo map ```example_map.esdf``` is contained in the example directory.
+An demo map `example_map.esdf` is contained in the example directory.
 
 If you use the docker image, run the following commands instead:
-```
+```bash
 xhost local:root
 docker container run -it --rm --name collision_avoidance_demo \
  -e DISPLAY=$DISPLAY \
@@ -90,20 +139,20 @@ docker container run -it --rm --name collision_avoidance_demo \
  perceptive_mpc:v0.3 ./src/perceptive_mpc/scripts/run_demo_collision_avoidance.sh
 ```
 After everything started, load a map by running:
-```
+```bash
 docker exec collision_avoidance_demo ./src/perceptive_mpc/scripts/load_map.sh
 ```
 ## Mechanical Stability
 The ZMP mechanical stability constraint is active by default.
-The radius of the support circle (circle inscribing the support polygon) can be set in the task.info configuration file.
-In the kinematic simulation, the external wrench is set to a default value specified in the `kinematic_simulation_parameters.yaml` file. The wrench is specified in end-effector reference frame.
-By sending a `WrenchPoseTrajectory` message, a time varying wrench can be specified. The wrenches in this message are again specified in the desired end-effector reference frame. The end-effector references themselves need to be specified in world frame.
+The radius of the support circle (circle inscribing the support polygon) can be set in the [`task.info`](./config/task.info) configuration file.
+In the kinematic simulation, the external wrench is set to a default value specified in the [`kinematic_simulation_parameters.yaml`](./config/kinematic_simulation_parameters.yaml) file. The wrench is specified in end-effector reference frame.
+By sending a [`WrenchPoseTrajectory`](./msg/WrenchPoseTrajectory.msg) message, a time varying wrench can be specified. The wrenches in this message are again specified in the desired end-effector reference frame. The end-effector references themselves need to be specified in world frame.
 ## Robot integration
-The software can easily be integrated with a mobile manipulator platform. The configuration can be copied from ```perceptive_mpc/example/KinematicSimulation.cpp```. The tracker thread is the main control loop. The current state estimate has to be set as the system observation. The optimal control inputs can be forwarded to the motor controllers.
+The software can easily be integrated with a mobile manipulator platform. The configuration can be copied from [`perceptive_mpc/example/KinematicSimulation.cpp`](./example/KinematicSimulation.cpp). The tracker thread is the main control loop. The current state estimate has to be set as the system observation. The optimal control inputs can be forwarded to the motor controllers.
 
-The admittance control module can only be tested on hardware or in a physics based simulation. The source code of ```KinematicSimulation.[h|cpp]``` contains hints on how to interface with the module.
+The admittance control module can only be tested on hardware or in a physics based simulation. The source code of `KinematicSimulation.[h|cpp]` contains hints on how to interface with the module.
 
-In order to use your custom manipulator, derive from the ```KinematicsInterface``` class and override the purely virtual methods for forward kinematics computation. We provide kinematic implementations for some popular robots:
+In order to use your custom manipulator, derive from the `KinematicsInterface` class and override the purely virtual methods for forward kinematics computation. We provide kinematic implementations for some popular robots:
 * Mabi Speedy 12
 * UR10
 * UR5

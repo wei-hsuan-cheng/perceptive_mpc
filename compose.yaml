@@ -1,0 +1,19 @@
+services:
+  perceptive_mpc: # service name, can be set to the same as the container name.
+    image: ocs2/perceptive_mpc
+    container_name: perceptive_mpc
+    privileged: true
+    network_mode: host
+    security_opt:
+      - seccomp=unconfined
+    shm_size: 512m
+    volumes:
+      - /dev/:/dev/:rw
+      - ${HOME}/src/:/root/src/:rw
+      - /tmp/.X11-unix/:/tmp/.X11-unix:rw
+      - ${HOME}/.xaut/:/root/.xaut/:rw
+    environment:
+      DISPLAY: ${DISPLAY}
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

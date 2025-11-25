@@ -4,6 +4,7 @@
     <arg name="rviz"                default="true" />
     <!--     Name of the task file which defines the mpc problem settings-->
     <arg name="mpc_task_file"       default="task.info"/>
+    <!-- <arg name="mpc_task_file"       default="admittance_task.info"/> -->
     <!-- Set path of robot description -->
     <arg name="description_file"    default="$(find perceptive_mpc)/urdf/mabi/mabi_mobile.urdf"/>
     <!-- Set rviz configuration -->

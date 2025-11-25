@@ -203,7 +203,7 @@ stability_soft_constraint
     activate        1
     mu              5e-3
     delta           1e-4
-    support_circle_radius 0.3
+    support_circle_radius 0.3 // 0.3; 0.1; 0.05; 0.6
 }
 
 voxblox_cost
