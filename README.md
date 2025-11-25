@@ -62,7 +62,9 @@ catkin build perceptive_mpc && . devel/setup.bash
 
 ### Docker image
 ```bash
-docker image build -f docker/Dockerfile -t perceptive_mpc:v0.3 --build-arg TARGETARCH=amd64 .
+docker build -f ./Dockerfile \
+   --build-arg TARGETARCH=amd64 \
+   -t perceptive_mpc:v0.3 .
 ```
 
 ### Custom docker development 
