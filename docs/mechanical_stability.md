@@ -3,28 +3,28 @@
 This note explains how the Zero Moment Point (ZMP) and the mechanical stability soft-constraint are implemented and how to use them at runtime.
 
 ## Closed-form ZMP used in the code
-In the base frame, with surface normal \(n = [0, 0, 1]^\top\), center of mass \(r_{\text{COG}}\), end-effector position \(r_{EE}\), gravity \(f_g\) and commanded interaction wrench \((f_{EE}, \tau_{EE})\), the planar moment balance at the ZMP is
-\[
+In the base frame, with surface normal $n = [0, 0, 1]^\top$, center of mass $r_{\text{COG}}$, end-effector position $r_{EE}$, gravity $f_g$ and commanded interaction wrench $(f_{EE}, \tau_{EE})$, the planar moment balance at the ZMP is
+$$
 0 = n \times \big((r_{\text{COG}} - r_{\text{ZMP}}) \times f_g\big) - (r_{EE} - r_{\text{ZMP}}) \times f_{EE} - \tau_{EE}.
-\]
+$$
 Solving for the ZMP location gives the expression implemented in code:
-\[
+$$
 r_{\text{ZMP}} = \frac{n \times (\,r_{\text{COG}} \times f_g - r_{EE} \times f_{EE} - \tau_{EE}\,)}{n \cdot (\,f_g - f_{EE}\,)}.
-\]
-We constrain the ZMP to lie inside a support circle of radius \(r_{sc}\) centered at the support polygon origin:
-\[
+$$
+We constrain the ZMP to lie inside a support circle of radius $r_{sc}$ centered at the support polygon origin:
+$$
 g_{\text{ZMP}}(x) = r_{sc}^2 - \|r_{\text{ZMP}}\|_2^2 \ge 0.
-\]
+$$
 
 ## Where it lives in the code
 - **ZMP computation:** `KinematicsInterface::getZMPBaseFrame` (`src/kinematics/KinematicsInterface.cpp:157`).
-  - Computes \(r_{\text{COG}}\) via `getCOMBaseFrame`.
+  - Computes $r_{\text{COG}}$ via `getCOMBaseFrame`.
   - Transforms the desired end-effector wrench from EE frame to base frame.
-  - Uses the closed-form equation above to return \(r_{\text{ZMP}}\) in the base frame.
+  - Uses the closed-form equation above to return $r_{\text{ZMP}}$ in the base frame.
 - **Soft constraint evaluation:** `StabilitySoftConstraint::intermediateCostFunction` (`src/costs/StabilitySoftConstraint.cpp:20`).
   - Interpolates the reference pose+wrench from the MPC trajectory.
-  - Calls `getZMPBaseFrame` and evaluates \(g_{\text{ZMP}} = r_{sc}^2 - (x_{\text{ZMP}}^2 + y_{\text{ZMP}}^2)\).
-  - Feeds that into a relaxed barrier (configurable \(\mu,\delta\)).
+  - Calls `getZMPBaseFrame` and evaluates $g_{\text{ZMP}} = r_{sc}^2 - (x_{\text{ZMP}}^2 + y_{\text{ZMP}}^2)$.
+  - Feeds that into a relaxed barrier (configurable $\mu,\delta$).
 - **Wiring into MPC:** `PerceptiveMpcInterface` (`example/PerceptiveMpcInterface.cpp:149`).
   - Loads the flag and parameters from the task file (see below).
   - If enabled, instantiates `StabilitySoftConstraint` with the chosen support circle radius.
@@ -42,7 +42,7 @@ stability_soft_constraint
     support_circle_radius 0.3  ; r_sc in meters
 }
 ```
-The MPC will then keep \(r_{\text{ZMP}}\) inside the support circle while following the pose/wrench trajectory.
+The MPC will then keep $r_{\text{ZMP}}$ inside the support circle while following the pose/wrench trajectory.
 
 ## API touch points
 - Compute ZMP directly (double): `kinematicsInterface.getZMPBaseFrame(state, desiredPose, desiredWrench)` (`include/perceptive_mpc/kinematics/KinematicsInterface.hpp:62`).
