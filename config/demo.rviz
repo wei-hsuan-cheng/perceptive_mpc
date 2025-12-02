@@ -9,7 +9,7 @@ Panels:
         - /Center of Mass1
         - /Zero Moment Point1
       Splitter Ratio: 0.5
-    Tree Height: 725
+    Tree Height: 365
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -385,7 +385,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.109053134918213
+      Distance: 3.563896656036377
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
